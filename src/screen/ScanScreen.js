@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   Linking,Alert,View,Modal,TouchableHighlight,ActivityIndicator
 } from 'react-native';
-
+    
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import { RNCamera } from 'react-native-camera';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -21,7 +21,10 @@ export default function ScanScreen ({navigation}) {
   const [Amount, setAmount] = useState("");
   const [Date, setDate] = useState("");
   const [Check_num, setCheck_num] = useState("");
+  const [Check_num_title, setCheck_num_title] = useState("");
   const [Doc_No, setDoc_No] = useState("");
+  const [Doc_type, setDoc_type] = useState("");
+
   const [Status, setStatus] = useState("");
   const [NetworkStatus, setNetworkStatus] = useState("");
   //views
@@ -62,6 +65,7 @@ export default function ScanScreen ({navigation}) {
   const check_qr_code_to_db  = (qr_code) => {
     setShowLoading(true);
     setShowView(false);
+    setStatus(0);
     const formData = new FormData();
     formData.append('company_code', company_code);
     formData.append('company_id',company_id);
@@ -85,10 +89,13 @@ export default function ScanScreen ({navigation}) {
             setDate(response_data.check_date);
             setDoc_No(response_data.doc_number);
             setCheck_num(response_data.check_num);
+            setCheck_num_title(response_data.check_num_title);
             setStatus(response_data.status);
+            setDoc_type(response_data.doc_type);
           }else{
-            setShowView(true); //show view
-            setStatus(response_data.status);
+            setShowView(false); //show view
+         
+           
           }
         }).catch((error) => {
           setShowLoading(false);
@@ -102,6 +109,47 @@ export default function ScanScreen ({navigation}) {
       setModalVisible(true);
     }
 
+    const check_qr_code_to_db_test  = () => {
+      setShowLoading(true);
+      setShowView(false);
+      setStatus(0);
+      const formData = new FormData();
+      formData.append('company_code', '882018');
+      formData.append('company_id','88');
+      formData.append('qr_code','PO-124-080320135216'); 
+        fetch(global.global_url+'check_qr_to_db2.php', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'multipart/form-data'
+          },
+          body: formData
+        }).then((response) => response.json())
+          .then((responseJson) => {
+            setShowLoading(false);
+            var response_data = responseJson.response_[0];
+            set_modal_visibile_with_status(1);
+            if(response_data.status>0){
+              setShowView(true); //show view
+              setAmount(response_data.amount);
+              setDate(response_data.check_date);
+              setDoc_No(response_data.doc_number);
+              setCheck_num(response_data.check_num);
+              setCheck_num_title(response_data.check_num_title);
+              setStatus(response_data.status);
+              setDoc_type(response_data.doc_type);
+            }else{
+              setShowView(false); //show view
+           
+             
+            }
+          }).catch((error) => {
+            setShowLoading(false);
+            console.error(error);
+            set_modal_visibile_with_status(0);
+          });
+      }
+
     return (
 
     <View style={styles.main}>
@@ -112,23 +160,24 @@ export default function ScanScreen ({navigation}) {
         onRead={onSuccess}
         flashMode={RNCamera.Constants.off}
         ref={(node) => {setScanner_id(node)}}
-        bottomContent={
-
-          <TouchableOpacity style={styles.buttonTouchable}>
-            <Text style={styles.buttonText}>OK. Got it!</Text>
-          </TouchableOpacity>
-        }
       />
       </View>
       <View style={{flex:3, backgroundColor:"white",padding:20}}>
-      <ActivityIndicator size="large" color="#0000ff" animating={ShowLoading}/>
-      {ShowView &&
-      <View>
-      <Text style={styles.textStyle_1}>{Doc_No}</Text>   
-      <Text>Date: {Date}</Text>
-      <Text>Check # : {Check_num}</Text>
-      <Text>Total Amount :{Amount}</Text>
-      </View>
+        {/* <Button title="test" onPress={() =>check_qr_code_to_db_test()}></Button> */}
+      {ShowView !=true?
+        ShowLoading == true?   
+        <View style={{flexDirection:"row",alignContent:"center",justifyContent:"center",padding:20}}>
+        <ActivityIndicator size="small" color="#0000ff" />
+        <Text>  Loading ...</Text>
+        </View> :null
+        :
+        <View>
+        <Text style={styles.textStyle_1}>{Doc_type}</Text>  
+        <Text style={styles.textStyle_1}>{Doc_No}</Text>   
+        <Text>Date: {Date}</Text>
+        <Text>{Check_num_title} : {Check_num}</Text>
+        <Text>Total Amount : P {Amount}</Text>
+        </View>
       }
       </View> 
       </View>
@@ -147,12 +196,10 @@ function Success_modal({visbiility,const_state,status,scanner,network_status}) {
           <View style={styles.modalView}>
       <View style={{flexDirection:"column-reverse",height: 100,width:250}}>
       <View style={{flexDirection:"row"}}>
- 
       <View style={{flex:1,flexDirection:"column"}}>
-   
       {network_status>0?status>0?
       <Text style={styles.status_text}><AntDesign name="checkcircleo" color={'#1FC80A'} size={20}/>  Success Document Verified!</Text>
-      :<Text style={styles.status_text}><AntDesign name="exclamationcircle" size={20}/> QR not found</Text>
+      :<Text style={styles.status_text}><AntDesign name="exclamationcircle" size={20}/> Invalid QR code</Text>
       :<Text style={styles.status_text}><AntDesign name="exclamationcircle" size={20}/>  Error Network Connection</Text>}
       <TouchableHighlight
           style={{...styles.openButton, backgroundColor: "#787878",marginTop:10}}

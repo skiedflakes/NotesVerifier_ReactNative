@@ -1,5 +1,5 @@
 import React,{useState,useRef} from 'react';
-import {StyleSheet,View,Text,Button,Image} from "react-native";
+import {StyleSheet,View,Text,Button,Image,TouchableOpacity} from "react-native";
 import AsyncStorage from '@react-native-community/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -42,10 +42,10 @@ return (
     <View style={{paddingTop:15,flex:0.5,backgroundColor: '#3490DD',flexDirection:'row',alignItems: 'center'}}>
     <FontAwesome name="user-circle" size={25} color={"#ffff"} style={{alignContent:'center',alignSelf:'center', color:'#ffff',padding:10}}/>
       <Text style={{alignContent:'center',alignSelf:'center', color:'#ffff'}}>{User_name}</Text>
-      <View style={{flex:5.5,flexDirection:'row-reverse',}}>
-      <MaterialCommunityIcons onPress={() =>logout()} name="logout" size={25} color={"#ffff"} style={{alignContent:'center',alignSelf:'center', color:'#ffff',padding:10}}/>
+      <TouchableOpacity style={{flex:5.5,flexDirection:'row-reverse',}} onPress={() =>logout()}>
+      <MaterialCommunityIcons  name="logout" size={25} color={"#ffff"} style={{alignContent:'center',alignSelf:'center', color:'#ffff',padding:10}}/>
       <Text style={{alignContent:'center',alignSelf:'center', color:'#ffff'}} onPress={() =>logout()}>Logout</Text>
-      </View>
+      </TouchableOpacity>
     </View>
     <View style={{flex:4,alignItems: 'center',alignContent:'center',justifyContent:'center',backgroundColor:'#14B6D6'}}>
 
@@ -55,17 +55,17 @@ return (
         source={require('../assets/qr_codes.png')}/>
     </View>  
     <View style={{backgroundColor:"#14B6D6",padding:20}}>
-      <View style={{  borderColor: 'black',
+      <TouchableOpacity style={{  borderColor: 'black',
     borderWidth: 0.5,
     borderRadius:30,   backgroundColor:"#ffff",    margin:20,
-    padding:15,}}>
-      <Text onPress={() =>start_scan()} style={{
+    padding:15,}}  onPress={() =>start_scan()}>
+      <Text style={{
     color:"#3490DD",
     textAlign:'center',
     fontSize:18,
     fontWeight:'bold'
     }}>START SCAN</Text>   
-      </View>
+      </TouchableOpacity>
    
     </View>
   </View>

@@ -1,5 +1,5 @@
 import React,{useState,useEffect,useRef} from 'react';
-import {StyleSheet,View, Button, Alert,ActivityIndicator,Image,Text} from "react-native";
+import {StyleSheet,View, Button, Alert,ActivityIndicator,Image,Text,TouchableOpacity} from "react-native";
 import { TextInput } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-community/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
@@ -9,6 +9,8 @@ export default function LoginScreen ({navigation}) {
   const [password, setPassword] = useState('');
   var [Show_loading,setShow_loading] = useState(false); 
   var [Show_view,setShow_view] = useState(false); 
+  var [Login_load,setLogin_load] = useState(false); 
+
   useFocusEffect(
     React.useCallback(() => {
       setUser('');
@@ -44,12 +46,14 @@ export default function LoginScreen ({navigation}) {
     }
   };
 
-  const login  = () => {
+  const login = async () => {
     if(!user){
       Alert.alert('Please enter username');
     } else if(!password){
       Alert.alert('Please enter password');
     } else {
+      setLogin_load(true);
+  
       const formData = new FormData();
       formData.append('username', user);
       formData.append('password', password);
@@ -64,7 +68,7 @@ export default function LoginScreen ({navigation}) {
 
       }).then((response) => response.json())
         .then((responseJson) => {
-
+          setLogin_load(false);
           var save_response_data = responseJson.response_[0];
 
           if(save_response_data.status == '1'){
@@ -77,10 +81,12 @@ export default function LoginScreen ({navigation}) {
             'user_name': save_response_data.user_name})
             navigation.navigate("Home");
           } else {
-              Alert.alert('User not found');
+            Alert.alert('User not found');
           }
         }).catch((error) => {
+          setLogin_load(false);
           console.error(error);
+          Alert.alert('Internet Connection Error');
         });
     }
   }
@@ -112,7 +118,10 @@ export default function LoginScreen ({navigation}) {
                 underlineColorAndroid='#FFF'
                 value={password}
         />
-    <Text onPress={() =>login()} style={{
+   
+    {Login_load==true? <ActivityIndicator style={{ padding:15,}} size="large" color="#0000ff" animating={true}/>: 
+    <TouchableOpacity  onPress={() =>login()}>
+    <Text style={{
     backgroundColor:"#ffff",
     color:"#14B6D6",
     margin:20,
@@ -123,9 +132,14 @@ export default function LoginScreen ({navigation}) {
     textAlign:'center',
     fontSize:18,
     fontWeight:'bold'
-    }}>Login</Text>   
-     </View>
-     }
+    }}>Login</Text>     
+    </TouchableOpacity> 
+    }
+   
+   
+
+    </View>
+    }
     </View>
     </View>
   )
